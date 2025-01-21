@@ -1,1 +1,5 @@
 lab7/Lab7_zadanie.ipynb filter=lfs diff=lfs merge=lfs -text
+lab7/data/README.roboflow.txt filter=lfs diff=lfs merge=lfs -text
+lab7/data/chess filter=lfs diff=lfs merge=lfs -text
+lab7/data/wild filter=lfs diff=lfs merge=lfs -text
+lab7/data/README.dataset.txt filter=lfs diff=lfs merge=lfs -text
