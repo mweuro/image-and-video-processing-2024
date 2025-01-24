@@ -1,5 +1,3 @@
-# from utils import *
-
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -54,16 +52,6 @@ def rgb_map(size: int = 500):
 
 
 
-# def find_angle_color(size, angle):
-#     color_map = rgb_map(size)
-#     # angle = (angle + np.pi) / (2 * np.pi) % 1
-#     R = size // 10
-#     x = np.round(R * np.cos(angle)).astype(int) + size // 2
-#     y = np.round(R * np.sin(angle)).astype(int) + size // 2
-#     return color_map[y, x]
-
-
-
 def display_rgb_map(ax: matplotlib.axes, size: int = 500) -> None:
     
     # init rgb map, and radius
@@ -112,14 +100,12 @@ def display_optical_flow_no_legend(ax: matplotlib.axes,
     hue = 1 - ((angle_gap + np.pi) / (2 * np.pi) % 1)
     colors = plt.cm.hsv(hue.flatten())[:, :3]
     # flow color setup
-    hsv = np.zeros(angle.shape, dtype=np.uint8)
-    hsv = np.stack([hsv] * 3, axis = -1)
-    hsv[..., 0] = (angle * 180 / np.pi) % 360
-    hsv[..., 0] = (360 - hsv[..., 0]) % 360
+    hsv = np.zeros((magnitude.shape[0], magnitude.shape[1], 3), dtype = np.uint8)
+    hsv[..., 0] = ((1 - ((angle + np.pi) / (2 * np.pi) % 1)) * 180).astype(np.uint8)
     hsv[..., 1] = 255
     hsv[..., 2] = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
-    # HSV = np.stack((H, S, V), axis = -1)
-    # rgb = plt.cm.hsv(hsv[..., 0])[:, :, :3]
+
+    # Konwersja HSV -> RGB
     rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
     
     if plot_type == 'vector':
