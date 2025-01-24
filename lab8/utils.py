@@ -1,3 +1,5 @@
+# from utils import *
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -34,24 +36,36 @@ def optical_flow(frame_1: np.ndarray, frame_2: np.ndarray, normalize: bool = Fal
 
 
 
+def rgb_map(size: int = 500):
+    # grid setup
+    x = np.linspace(-1, 1, size)
+    y = np.linspace(-1, 1, size)
+    X, Y = np.meshgrid(x, y)
+    # cartesian -> polar
+    R = np.sqrt(X**2 + Y**2)
+    Theta = np.arctan2(Y, X)
+    # HSV -> RGB
+    H = (Theta + np.pi) / (2 * np.pi)
+    S = np.clip(R, 0, 1)
+    V = np.ones_like(R)
+    HSV = np.stack((H, S, V), axis = -1)
+    RGB = plt.cm.hsv(HSV[..., 0])[:, :, :3]
+    return RGB
+
+
+
+# def find_angle_color(size, angle):
+#     color_map = rgb_map(size)
+#     # angle = (angle + np.pi) / (2 * np.pi) % 1
+#     R = size // 10
+#     x = np.round(R * np.cos(angle)).astype(int) + size // 2
+#     y = np.round(R * np.sin(angle)).astype(int) + size // 2
+#     return color_map[y, x]
+
+
+
 def display_rgb_map(ax: matplotlib.axes, size: int = 500) -> None:
     
-    def rgb_map(size: int = 500):
-        # grid setup
-        x = np.linspace(-1, 1, size)
-        y = np.linspace(-1, 1, size)
-        X, Y = np.meshgrid(x, y)
-        # cartesian -> polar
-        R = np.sqrt(X**2 + Y**2)
-        Theta = np.arctan2(Y, X)
-        # HSV -> RGB
-        H = (Theta + np.pi) / (2 * np.pi)
-        S = np.clip(R, 0, 1)
-        V = np.ones_like(R)
-        HSV = np.stack((1 - H, S, V), axis = -1)
-        RGB = plt.cm.hsv(HSV[..., 0])[:, :, :3]
-        return RGB
-
     # init rgb map, and radius
     rgb = rgb_map(size)
     R = 5
@@ -95,14 +109,17 @@ def display_optical_flow_no_legend(ax: matplotlib.axes,
     v_gap = v[::gap, ::gap]
     angle_gap = angle[::gap, ::gap]
     # vector color setup
-    hue = (angle_gap + np.pi) / (2 * np.pi) % 1
+    hue = 1 - ((angle_gap + np.pi) / (2 * np.pi) % 1)
     colors = plt.cm.hsv(hue.flatten())[:, :3]
     # flow color setup
     hsv = np.zeros(angle.shape, dtype=np.uint8)
     hsv = np.stack([hsv] * 3, axis = -1)
     hsv[..., 0] = (angle * 180 / np.pi) % 360
+    hsv[..., 0] = (360 - hsv[..., 0]) % 360
     hsv[..., 1] = 255
     hsv[..., 2] = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
+    # HSV = np.stack((H, S, V), axis = -1)
+    # rgb = plt.cm.hsv(hsv[..., 0])[:, :, :3]
     rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
     
     if plot_type == 'vector':
